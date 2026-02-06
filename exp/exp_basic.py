@@ -3,20 +3,20 @@ import torch
 import importlib
 import pkgutil  
 
-# Just put your model files under models/ folder
-# e.g., models/Transformer.py, models/LSTM.py, etc.
-# All models will be automatically detected and can be used by specifying their names.
+# 只需将模型文件放在 models/ 文件夹下
+# 例如：models/Transformer.py, models/LSTM.py 等
+# 所有模型将被自动检测，可以通过指定其名称使用
 
 class Exp_Basic(object):
     def __init__(self, args):
         self.args = args
         
         # -------------------------------------------------------
-        #  Automatically generate model map
+        #  自动生成模型映射
         # -------------------------------------------------------
         model_map = self._scan_models_directory()
 
-        # Use smart dictionary
+        # 使用智能字典
         self.model_dict = LazyModelDict(model_map)
 
         self.device = self._acquire_device()
@@ -24,23 +24,23 @@ class Exp_Basic(object):
 
     def _scan_models_directory(self):
         """
-        Automatically scan all .py files in the models folder
+        自动扫描 models 文件夹中的所有 .py 文件
         """
         model_map = {}
         models_dir = 'models'
 
-        # Iterate through all files in 'models' directory
+        # 遍历 'models' 目录中的所有文件
         if os.path.exists(models_dir):
             for filename in os.listdir(models_dir):
-                # Ignore __init__.py and non-.py files
+                # 忽略 __init__.py 和非 .py 文件
                 if filename.endswith('.py') and filename != '__init__.py':
-                    # Remove .py extension to get module name
+                    # 移除 .py 扩展名以获取模块名
                     module_name = filename[:-3]
                     
-                    # Build full import path
+                    # 构建完整的导入路径
                     full_path = f"{models_dir}.{module_name}"
                     
-                    # loading dict: {'Transformer': 'models.Transformer'}
+                    # 加载字典：{'Transformer': 'models.Transformer'}
                     model_map[module_name] = full_path
         
         return model_map
@@ -78,7 +78,7 @@ class Exp_Basic(object):
 
 class LazyModelDict(dict):
     """
-    Smart Lazy-Loading Dictionary
+    智能懒加载字典
     """
     def __init__(self, model_map):
         self.model_map = model_map
@@ -99,7 +99,7 @@ class LazyModelDict(dict):
             print(f"❌ Error: Failed to import model [{key}]. Dependencies missing?")
             raise e
 
-        # Try to find the model class
+        # 尝试查找模型类
         if hasattr(module, 'Model'):
             model_class = module.Model
         elif hasattr(module, key):
