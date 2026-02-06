@@ -36,17 +36,17 @@ MODEL = 'DLinear'
 #   较重但强: 'TimesNet', 'Autoformer', 'FEDformer'
 #   最新SOTA: 'TimeXer' (需要外生变量)
 
-MODEL_ID = 'ETTh1_96_96'  # 实验标识，格式建议：数据集_输入长度_预测长度
+MODEL_ID = 'ETTm1_672_96'  # 实验标识，格式建议：数据集_输入长度_预测长度
 
 # ---------------------- 数据配置 ----------------------
-DATA = 'ETTh1'                    # 数据集类型
+DATA = 'ETTm1'                    # 数据集类型
 ROOT_PATH = './dataset/'          # 数据根目录
-DATA_PATH = 'ETTh1.csv'           # 数据文件名
+DATA_PATH = 'ETTm1.csv'           # 数据文件名
 # 可用数据集：
 #   ETT系列: ETTh1.csv, ETTh2.csv, ETTm1.csv, ETTm2.csv
 #   其他: electricity.csv, weather.csv, traffic.csv, exchange_rate.csv
 
-FEATURES = 'M'
+FEATURES = 'MS'
 # 预测类型：
 #   'M'  : 多变量预测多变量 (Multivariate -> Multivariate)
 #   'S'  : 单变量预测单变量 (Univariate -> Univariate)
@@ -55,15 +55,15 @@ FEATURES = 'M'
 TARGET = 'OT'  # 目标变量名（用于 S 或 MS 任务）
 
 # ---------------------- 序列长度配置 ----------------------
-SEQ_LEN = 96      # 输入序列长度（历史窗口）
-LABEL_LEN = 48    # 标签长度（decoder的起始token）
+SEQ_LEN = 96 * 7      # 输入序列长度（历史窗口）
+LABEL_LEN = SEQ_LEN // 2    # 标签长度（decoder的起始token）
 PRED_LEN = 96     # 预测长度
 
 # ---------------------- 模型结构配置 ----------------------
 ENC_IN = 7        # 编码器输入特征数（ETTh1有7个特征）
 DEC_IN = 7        # 解码器输入特征数
-C_OUT = 7         # 输出特征数
-D_MODEL = 512     # 模型维度
+C_OUT = 1         # 输出特征数
+D_MODEL = 256     # 模型维度
 N_HEADS = 8       # 注意力头数
 E_LAYERS = 2      # 编码器层数
 D_LAYERS = 1      # 解码器层数
@@ -71,7 +71,7 @@ D_FF = 2048       # 前馈网络维度
 DROPOUT = 0.1     # Dropout率
 
 # ---------------------- 训练配置 ----------------------
-TRAIN_EPOCHS = 10    # 训练轮数
+TRAIN_EPOCHS = 50    # 训练轮数
 BATCH_SIZE = 32      # 批次大小
 LEARNING_RATE = 0.0001  # 学习率
 PATIENCE = 3         # 早停耐心值

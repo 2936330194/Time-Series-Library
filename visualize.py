@@ -22,14 +22,18 @@ warnings.filterwarnings('ignore')
 # ============================================================================
 
 # Result directory (modify to your experiment result path)
-RESULT_DIR = './results/long_term_forecast_ETTh1_96_96_DLinear_ETTh1_ftM_sl96_ll48_pl96_dm512_nh8_el2_dl1_df2048_expand2_dc4_fc1_ebtimeF_dtTrue_Exp_0'
+RESULT_DIR = './results/long_term_forecast_ETTm1_672_96_DLinear_ETTm1_ftMS_sl672_ll336_pl96_dm256_nh8_el2_dl1_df2048_expand2_dc4_fc1_ebtimeF_dtTrue_Exp_0'
 
 # Visualization settings
 SHOW_SAMPLES = 5          # Number of samples to display
-FEATURE_NAMES = ['HUFL', 'HULL', 'MUFL', 'MULL', 'LUFL', 'LULL', 'OT']  # ETTh1 features
+# ETTm1 full feature list. For MS task, prediction/true typically contain only the target column.
+FEATURE_NAMES = ['HUFL', 'HULL', 'MUFL', 'MULL', 'LUFL', 'LULL', 'OT']
 SCALE_FACTOR = 0.7        # Scale factor for figure size (0.5 = half size, 1.0 = original)
 SAVE_PLOTS = True          # Save plots to file
 OUTPUT_DIR = './visualizations/'  # Output directory
+
+# Default feature index for plotting. For MS task outputs (single feature), use 0.
+DEFAULT_FEATURE_IDX = 0
 
 # Style settings
 plt.style.use('seaborn-v0_8-whitegrid')
@@ -67,7 +71,11 @@ def load_results(result_dir):
     print(f"Loaded results successfully!")
     print(f"   Prediction shape: {pred.shape} (samples, pred_len, features)")
     print(f"   Ground Truth shape: {true.shape}")
-    print(f"   MSE: {metrics[0]:.6f}, MAE: {metrics[1]:.6f}")
+    # metrics.npy 保存顺序通常为 [mae, mse, rmse, mape, mspe]
+    if len(metrics) >= 2:
+        print(f"   MAE: {metrics[0]:.6f}, MSE: {metrics[1]:.6f}")
+    else:
+        print(f"   Metrics: {metrics}")
     
     return pred, true, metrics
 
@@ -316,8 +324,11 @@ def print_summary_statistics(pred, true, metrics):
     print(f"Prediction length: {pred.shape[1]}")
     print(f"Number of features: {pred.shape[2]}")
     print("-"*60)
-    print(f"Overall MSE: {metrics[0]:.6f}")
-    print(f"Overall MAE: {metrics[1]:.6f}")
+    if len(metrics) >= 2:
+        print(f"Overall MAE: {metrics[0]:.6f}")
+        print(f"Overall MSE: {metrics[1]:.6f}")
+    else:
+        print(f"Overall metrics: {metrics}")
     print("-"*60)
     
     # Performance per feature
@@ -338,12 +349,24 @@ def main():
     print("\n" + "="*60)
     print("Time-Series-Library Visualization Tool")
     print("="*60 + "\n")
+
+    # 结果目录对应的可视化输出子目录
+    global OUTPUT_DIR
+    OUTPUT_DIR = os.path.join(OUTPUT_DIR, os.path.basename(RESULT_DIR))
     
     # Create output directory
     create_output_dir()
     
     # Load results
     pred, true, metrics = load_results(RESULT_DIR)
+
+    # MS 任务通常只输出目标列，这里将特征名缩减为目标列名，避免显示错误
+    global FEATURE_NAMES
+    if pred.shape[2] == 1 and len(FEATURE_NAMES) > 1:
+        FEATURE_NAMES = [FEATURE_NAMES[-1]]
+
+    # 选择可视化的特征索引（防止越界）
+    feature_idx = min(DEFAULT_FEATURE_IDX, pred.shape[2] - 1)
     
     # Print summary statistics
     print_summary_statistics(pred, true, metrics)
@@ -353,7 +376,7 @@ def main():
     
     # 1. Prediction samples
     print("1. Prediction samples comparison...")
-    plot_prediction_samples(pred, true, n_samples=SHOW_SAMPLES, feature_idx=6)  # OT is the 7th feature
+    plot_prediction_samples(pred, true, n_samples=SHOW_SAMPLES, feature_idx=feature_idx)
     
     # 2. All features for single sample
     print("\n2. Single sample all features...")
@@ -365,7 +388,7 @@ def main():
     
     # 4. Global prediction overview
     print("\n4. Global prediction overview...")
-    plot_prediction_overview(pred, true, n_continuous=100, feature_idx=6)
+    plot_prediction_overview(pred, true, n_continuous=100, feature_idx=feature_idx)
     
     print("\nVisualization complete!")
     if SAVE_PLOTS:
