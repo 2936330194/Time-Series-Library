@@ -62,6 +62,7 @@ PRED_LEN = 96     # 预测长度
 # ---------------------- 模型结构配置 ----------------------
 ENC_IN = 7        # 编码器输入特征数（ETTh1有7个特征）
 DEC_IN = 7        # 解码器输入特征数
+# TimeMixer + channel_independence=1 会按每个变量独立建模，输出维度需与变量数一致
 C_OUT = 1         # 输出特征数
 D_MODEL = 256     # 模型维度
 N_HEADS = 8       # 注意力头数
@@ -71,7 +72,7 @@ D_FF = 2048       # 前馈网络维度
 DROPOUT = 0.1     # Dropout率
 
 # ---------------------- 训练配置 ----------------------
-TRAIN_EPOCHS = 50    # 训练轮数
+TRAIN_EPOCHS = 30    # 训练轮数
 BATCH_SIZE = 32      # 批次大小
 LEARNING_RATE = 0.0001  # 学习率
 PATIENCE = 3         # 早停耐心值
@@ -161,12 +162,12 @@ def main():
         expand=2,
         d_conv=4,
         moving_avg=25,
-        channel_independence=1,
+        channel_independence=0,
         decomp_method='moving_avg',
         use_norm=1,
-        down_sampling_layers=0,
-        down_sampling_window=1,
-        down_sampling_method=None,
+        down_sampling_layers=3,
+        down_sampling_window=2,
+        down_sampling_method='avg',
         seg_len=96,
         
         # 任务特定参数
