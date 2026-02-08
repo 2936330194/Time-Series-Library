@@ -29,7 +29,7 @@ TASK_NAME = 'long_term_forecast'
 IS_TRAINING = 1  # 1=训练+测试, 0=仅测试（需要已有checkpoint）
 
 # ---------------------- 模型配置 ----------------------
-MODEL = 'DLinear'
+MODEL = 'PatchTST'
 # 推荐模型（按复杂度排序）：
 #   简单快速: 'DLinear', 'NLinear', 'Linear'
 #   中等性能: 'PatchTST', 'TimeMixer', 'iTransformer'
